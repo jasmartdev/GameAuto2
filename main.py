@@ -13,7 +13,7 @@ mission_complete_mission_body = b'{"missionId":1,"victory":false,"monstersKilled
 challenge_start_challenge_url = 'https://defense-wall-production.up.railway.app/api/player/d4e5cc74-e8e1-41f4-92d6-1450a596e4ae/challenge/start'
 challenge_start_challenge_body = b'{"worldId":1}'
 challenge_complete_challenge_url = 'https://defense-wall-production.up.railway.app/api/player/d4e5cc74-e8e1-41f4-92d6-1450a596e4ae/challenge/complete'
-challenge_complete_challenge_body = b'{"worldId":1,"victory":false,"wavesCompleted":10,"monstersKilled":400,"battleEvents":[],"antiCheat":{"version":1,"team":[1,11,4,5,12],"waves":[]}}'
+challenge_complete_challenge_body = b'{"worldId":1,"victory":true,"wavesCompleted":10,"monstersKilled":400,"battleEvents":[],"antiCheat":{"version":1,"team":[1,11,4,5,12],"waves":[]}}'
 
 def run_health_check_server():
     # Back4app uses HTTP, so bind to standard HTTP logic on the requested port
