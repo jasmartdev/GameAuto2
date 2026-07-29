@@ -109,14 +109,15 @@ if __name__ == '__main__':
                         start_challegen_time = time.time()
             elif challengen_state == 2:
                 if time.time() - start_challegen_time > 300:
-                    challengen_state = 3
+                    #challengen_state = 3
                     complete_challenge_body = challenge_complete_challenge_body
                     json_data = json.loads(complete_challenge_body.decode('utf-8'))
                     json_data['worldId'] = current_worldId
                     json_data['monstersKilled'] = monsters_killed_array[current_worldId%4]
                     complete_challenge_body = json.dumps(json_data).encode('utf-8')
-                    response = requests.post(
+                    requests.post(
                     url=challenge_complete_challenge_url, 
                     headers=game_headers, 
                     data=complete_challenge_body
                     )
+                    challengen_state = 0
