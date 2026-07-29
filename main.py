@@ -7,13 +7,13 @@ from http.server import SimpleHTTPRequestHandler, HTTPServer
 
 game_headers = {'sec-ch-ua-platform': '"Windows"', 'authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwbGF5ZXJJZCI6IjEyYmNmOTk0LWUwZmMtNGNkNi05MmI1LWE0YjAzYTE1YTJlNiIsImlhdCI6MTc4NDY0MzEzOCwiZXhwIjoxNzkyNDE5MTM4fQ.9G2rOtWmRXgLrHUEgs5eM6N3bdRH5wrbvWrgb1QqsMM', 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36', 'sec-ch-ua': '"Not;A=Brand";v="8", "Chromium";v="150", "Google Chrome";v="150"', 'content-type': 'application/json', 'sec-ch-ua-mobile': '?0', 'accept': '*/*', 'origin': 'https://wall-wars.game-files.crazygames.com', 'sec-fetch-site': 'cross-site', 'sec-fetch-mode': 'cors', 'sec-fetch-dest': 'empty', 'referer': 'https://wall-wars.game-files.crazygames.com/', 'accept-encoding': 'gzip, deflate, br, zstd', 'accept-language': 'en-US,en;q=0.9', 'priority': 'u=1, i'}
 mission_start_mission_url = 'https://defense-wall-production.up.railway.app/api/player/d4e5cc74-e8e1-41f4-92d6-1450a596e4ae/start-mission'
-mission_start_mission_body = b'{"missionId":9}'
+mission_start_mission_body = b'{"missionId":1}'
 mission_complete_mission_url = 'https://defense-wall-production.up.railway.app/api/player/d4e5cc74-e8e1-41f4-92d6-1450a596e4ae/complete-mission'
-mission_complete_mission_body = b'{"missionId":9,"victory":false,"monstersKilled":500,"antiCheat":{"version":1,"team":[1,11,4,5,12],"waves":[]}}'
+mission_complete_mission_body = b'{"missionId":1,"victory":false,"monstersKilled":1000,"antiCheat":{"version":1,"team":[1,11,4,5,12],"waves":[]}}'
 challenge_start_challenge_url = 'https://defense-wall-production.up.railway.app/api/player/d4e5cc74-e8e1-41f4-92d6-1450a596e4ae/challenge/start'
-challenge_start_challenge_body = b'{"worldId":5}'
+challenge_start_challenge_body = b'{"worldId":1}'
 challenge_complete_challenge_url = 'https://defense-wall-production.up.railway.app/api/player/d4e5cc74-e8e1-41f4-92d6-1450a596e4ae/challenge/complete'
-challenge_complete_challenge_body = b'{"worldId":5,"victory":false,"wavesCompleted":10,"monstersKilled":400,"battleEvents":[],"antiCheat":{"version":1,"team":[1,11,4,5,12],"waves":[]}}'
+challenge_complete_challenge_body = b'{"worldId":1,"victory":false,"wavesCompleted":10,"monstersKilled":400,"battleEvents":[],"antiCheat":{"version":1,"team":[1,11,4,5,12],"waves":[]}}'
 
 def run_health_check_server():
     # Back4app uses HTTP, so bind to standard HTTP logic on the requested port
@@ -25,14 +25,14 @@ def run_health_check_server():
 if __name__ == '__main__':
     health_thread = threading.Thread(target=run_health_check_server, daemon=True)
     health_thread.start()
-    current_missionId = 9
-    current_monstersKilled = 500
+    current_missionId = 1
+    current_monstersKilled = 1000
     current_sleep_time = 80
     is_test_monsters = True
     is_complete_mission = False
     #Challenge
     monsters_killed_array = [319, 404, 440, 341]
-    #current_worldId = 77
+    current_worldId = 1
     challengen_state = 0 #0: chua kiem tra, 1: da kiem tra, 2: da bat dau, 3: da ket thuc
     start_challegen_time = 0
     while True:
@@ -89,15 +89,15 @@ if __name__ == '__main__':
             #Challenge
             if challengen_state == 0:
                 if data.get('player') and data.get('player').get('challengeCurrentWorld'):
-                    #current_worldId = data.get('player').get('challengeCurrentWorld')
+                    current_worldId = data.get('player').get('challengeCurrentWorld')
                     if data.get('player').get('challengeTickets') == 0:
                         challengen_state = 1
                     else:
                         challengen_state = 2
                         start_challenge_body = challenge_start_challenge_body
-                        #json_data = json.loads(start_challenge_body.decode('utf-8'))
-                        #json_data['worldId'] = current_worldId
-                        #start_challenge_body = json.dumps(json_data).encode('utf-8')
+                        json_data = json.loads(start_challenge_body.decode('utf-8'))
+                        json_data['worldId'] = current_worldId
+                        start_challenge_body = json.dumps(json_data).encode('utf-8')
                         requests.post(
                         url=challenge_start_challenge_url, 
                         headers=game_headers, 
@@ -108,10 +108,10 @@ if __name__ == '__main__':
                 if time.time() - start_challegen_time > 300:
                     challengen_state = 3
                     complete_challenge_body = challenge_complete_challenge_body
-                    #json_data = json.loads(complete_challenge_body.decode('utf-8'))
-                    #json_data['worldId'] = current_worldId
-                    #json_data['monstersKilled'] = monsters_killed_array[current_worldId%4]
-                    #complete_challenge_body = json.dumps(json_data).encode('utf-8')
+                    json_data = json.loads(complete_challenge_body.decode('utf-8'))
+                    json_data['worldId'] = current_worldId
+                    json_data['monstersKilled'] = monsters_killed_array[current_worldId%4]
+                    complete_challenge_body = json.dumps(json_data).encode('utf-8')
                     response = requests.post(
                     url=challenge_complete_challenge_url, 
                     headers=game_headers, 
