@@ -1,14 +1,15 @@
 import time
 import json
+import re
 import requests
 import threading
 from http.server import SimpleHTTPRequestHandler, HTTPServer
 
 game_headers = {'sec-ch-ua-platform': '"Windows"', 'authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwbGF5ZXJJZCI6IjEyYmNmOTk0LWUwZmMtNGNkNi05MmI1LWE0YjAzYTE1YTJlNiIsImlhdCI6MTc4NDY0MzEzOCwiZXhwIjoxNzkyNDE5MTM4fQ.9G2rOtWmRXgLrHUEgs5eM6N3bdRH5wrbvWrgb1QqsMM', 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36', 'sec-ch-ua': '"Not;A=Brand";v="8", "Chromium";v="150", "Google Chrome";v="150"', 'content-type': 'application/json', 'sec-ch-ua-mobile': '?0', 'accept': '*/*', 'origin': 'https://wall-wars.game-files.crazygames.com', 'sec-fetch-site': 'cross-site', 'sec-fetch-mode': 'cors', 'sec-fetch-dest': 'empty', 'referer': 'https://wall-wars.game-files.crazygames.com/', 'accept-encoding': 'gzip, deflate, br, zstd', 'accept-language': 'en-US,en;q=0.9', 'priority': 'u=1, i'}
 mission_start_mission_url = 'https://defense-wall-production.up.railway.app/api/player/d4e5cc74-e8e1-41f4-92d6-1450a596e4ae/start-mission'
-mission_start_mission_body = b'{"missionId":8}'
+mission_start_mission_body = b'{"missionId":9}'
 mission_complete_mission_url = 'https://defense-wall-production.up.railway.app/api/player/d4e5cc74-e8e1-41f4-92d6-1450a596e4ae/complete-mission'
-mission_complete_mission_body = b'{"missionId":8,"victory":false,"monstersKilled":100,"antiCheat":{"version":1,"team":[1,11,4,5,12],"waves":[]}}'
+mission_complete_mission_body = b'{"missionId":9,"victory":false,"monstersKilled":100,"antiCheat":{"version":1,"team":[1,11,4,5,12],"waves":[]}}'
 challenge_start_challenge_url = 'https://defense-wall-production.up.railway.app/api/player/d4e5cc74-e8e1-41f4-92d6-1450a596e4ae/challenge/start'
 challenge_start_challenge_body = b'{"worldId":5}'
 challenge_complete_challenge_url = 'https://defense-wall-production.up.railway.app/api/player/d4e5cc74-e8e1-41f4-92d6-1450a596e4ae/challenge/complete'
@@ -24,8 +25,8 @@ def run_health_check_server():
 if __name__ == '__main__':
     health_thread = threading.Thread(target=run_health_check_server, daemon=True)
     health_thread.start()
-    current_missionId = 159
-    current_monstersKilled = 193
+    current_missionId = 9
+    current_monstersKilled = 100
     current_sleep_time = 80
     is_test_monsters = True
     is_complete_mission = False
@@ -47,9 +48,8 @@ if __name__ == '__main__':
         data = response.json()
         data_error = data.get('error')
         if data_error and 'Cannot replay completed mission' in data_error:
-            data_error = data_error[:-11]
-            data_error = data_error[58:]
-            current_missionId = int(data_error.strip())
+            numbers = re.findall(r"\d+", data_error)
+            current_missionId = numbers[1] if len(numbers) >  1 else None
             continue
         complete_mission_body = mission_complete_mission_body
         json_data = json.loads(complete_mission_body.decode('utf-8'))
