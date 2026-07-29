@@ -26,7 +26,7 @@ if __name__ == '__main__':
     health_thread = threading.Thread(target=run_health_check_server, daemon=True)
     health_thread.start()
     current_missionId = 9
-    current_monstersKilled = 100
+    current_monstersKilled = 500
     current_sleep_time = 80
     is_test_monsters = True
     is_complete_mission = False
