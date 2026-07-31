@@ -1,6 +1,7 @@
 import time
 import json
 import re
+import traceback
 import requests
 import threading
 import health_check_server
@@ -20,16 +21,21 @@ if __name__ == '__main__':
     #Challenge
     monsters_killed_array = [319, 404, 440, 341]
     current_worldId = 1
-    challengen_state = 0 #0: chua kiem tra, 1: da kiem tra, 2: da bat dau, 3: da ket thuc
+    challengen_state = 0 #0: chua kiem tra, 1: da kiem tra, 2: da bat dau
     start_challegen_time = 0
     while True:
         account1.set_start_mission_body(current_missionId)
         response = requests.post(
-        url=account1.get_start_mission_url(), 
-        headers=game_headers, 
-        data=account1.get_start_mission_body()
+            url=account1.get_start_mission_url(), 
+            headers=game_headers, 
+            data=account1.get_start_mission_body()
         )
-        data = response.json()
+        try:
+            data = response.json()
+        except Exception as e:
+            print(e)
+            traceback.print_stack()
+            continue
         utils_game.my_print(data)
         data_error = data.get('error')
         if data_error:
@@ -48,16 +54,20 @@ if __name__ == '__main__':
             else:
                 account1.set_complete_mission_body(current_missionId, False, current_monstersKilled)
         response = requests.post(
-        url=account1.get_complete_mission_url(), 
-        headers=game_headers, 
-        data=account1.get_complete_mission_body()
+            url=account1.get_complete_mission_url(), 
+            headers=game_headers, 
+            data=account1.get_complete_mission_body()
         )
-        data = response.json()
+        try:
+            data = response.json()
+        except Exception as e:
+            print(e)
+            traceback.print_stack()
+            continue
         utils_game.my_print(data)
         data_error = data.get('error')
         if data_error:
             if data.get('code') == 'SERVER_ERROR':
-                print('SERVER_ERROR')
                 current_sleep_time = current_sleep_time + 20
             elif 'Invalid monstersKilled' in data_error:
                 current_monstersKilled = int(data.get('error').split('-')[1]) - 1
@@ -79,18 +89,64 @@ if __name__ == '__main__':
                     else:
                         challengen_state = 2
                         account1.set_start_challenge_body(current_worldId)
-                        utils_game.my_print(requests.post(
-                        url=account1.get_start_challenge_url(), 
-                        headers=game_headers, 
-                        data=account1.get_start_challenge_body()
-                        ).json())
+                        try:
+                            utils_game.my_print(requests.post(
+                                url=account1.get_start_challenge_url(), 
+                                headers=game_headers, 
+                                data=account1.get_start_challenge_body()
+                            ).json())
+                        except Exception as e:
+                            print(e)
+                            traceback.print_stack()
+                            continue
                         start_challegen_time = time.time()
             elif challengen_state == 2:
                 if time.time() - start_challegen_time > 300:
                     account1.set_complete_challenge_body(current_worldId, True, monsters_killed_array[current_worldId%4])
-                    utils_game.my_print(requests.post(
-                    url=account1.get_complete_challenge_url(), 
-                    headers=game_headers, 
-                    data=account1.get_complete_challenge_body()
-                    ).json())
+                    try:
+                        utils_game.my_print(requests.post(
+                            url=account1.get_complete_challenge_url(), 
+                            headers=game_headers, 
+                            data=account1.get_complete_challenge_body()
+                        ).json())
+                    except Exception as e:
+                        print(e)
+                        traceback.print_stack()
+                        continue
                     challengen_state = 0
+            #Forge
+            if data.get('player'):
+                forgeSlots = data.get('player').get('forgeSlots')
+                if forgeSlots:
+                    i = 0
+                    for forgeSlot in forgeSlots:
+                        if forgeSlot:
+                            try:
+                                current_timestamp = time.time() * 1000
+                                if current_timestamp > forgeSlot.get('startTime') + forgeSlot.get('craftTimeMs'):
+                                    account1.set_forge_claim_body(i)
+                                    utils_game.my_print(requests.post(
+                                        url=account1.get_forge_claim_url(), 
+                                        headers=game_headers, 
+                                        data=account1.get_forge_claim_body()
+                                    ).json())
+                                    time.sleep(2)
+                                    utils_game.my_print(requests.post(
+                                        url=account1.get_forge_craft_url(), 
+                                        headers=game_headers
+                                    ).json())
+                            except Exception as e:
+                                print(e)
+                                traceback.print_stack()
+                                continue
+                        else:
+                            try:
+                                utils_game.my_print(requests.post(
+                                    url=account1.get_forge_craft_url(), 
+                                    headers=game_headers
+                                ).json())
+                            except Exception as e:
+                                print(e)
+                                traceback.print_stack()
+                                continue
+                        i = i + 1
