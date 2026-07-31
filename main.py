@@ -3,28 +3,15 @@ import json
 import re
 import requests
 import threading
-from http.server import SimpleHTTPRequestHandler, HTTPServer
-
-game_headers = {'sec-ch-ua-platform': '"Windows"', 'authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwbGF5ZXJJZCI6ImQ0ZTVjYzc0LWU4ZTEtNDFmNC05MmQ2LTE0NTBhNTk2ZTRhZSIsImlhdCI6MTc4NTI0NzQ4NSwiZXhwIjoxNzkzMDIzNDg1fQ.okSBjmZkK4RUYOUXs0mU2pWBhB6kIEKPQeE4VXEaBFc', 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36', 'sec-ch-ua': '"Not;A=Brand";v="8", "Chromium";v="150", "Google Chrome";v="150"', 'content-type': 'application/json', 'sec-ch-ua-mobile': '?0', 'accept': '*/*', 'origin': 'https://wall-wars.game-files.crazygames.com', 'sec-fetch-site': 'cross-site', 'sec-fetch-mode': 'cors', 'sec-fetch-dest': 'empty', 'referer': 'https://wall-wars.game-files.crazygames.com/', 'accept-encoding': 'gzip, deflate, br, zstd', 'accept-language': 'en-US,en;q=0.9', 'priority': 'u=1, i'}
-mission_start_mission_url = 'https://defense-wall-production.up.railway.app/api/player/d4e5cc74-e8e1-41f4-92d6-1450a596e4ae/start-mission'
-mission_start_mission_body = b'{"missionId":1}'
-mission_complete_mission_url = 'https://defense-wall-production.up.railway.app/api/player/d4e5cc74-e8e1-41f4-92d6-1450a596e4ae/complete-mission'
-mission_complete_mission_body = b'{"missionId":1,"victory":false,"monstersKilled":1000,"antiCheat":{"version":1,"team":[1,11,4,5,12],"waves":[]}}'
-challenge_start_challenge_url = 'https://defense-wall-production.up.railway.app/api/player/d4e5cc74-e8e1-41f4-92d6-1450a596e4ae/challenge/start'
-challenge_start_challenge_body = b'{"worldId":1}'
-challenge_complete_challenge_url = 'https://defense-wall-production.up.railway.app/api/player/d4e5cc74-e8e1-41f4-92d6-1450a596e4ae/challenge/complete'
-challenge_complete_challenge_body = b'{"worldId":1,"victory":true,"wavesCompleted":10,"monstersKilled":400,"battleEvents":[],"antiCheat":{"version":1,"team":[1,11,4,5,12],"waves":[]}}'
-
-def run_health_check_server():
-    # Back4app uses HTTP, so bind to standard HTTP logic on the requested port
-    server_address = ('0.0.0.0', 443)
-    httpd = HTTPServer(server_address, SimpleHTTPRequestHandler)
-    print("Health check server running on port 443...")
-    httpd.serve_forever()
+import health_check_server
+import utils_game
+from account import Account
 
 if __name__ == '__main__':
-    health_thread = threading.Thread(target=run_health_check_server, daemon=True)
+    health_thread = threading.Thread(target=health_check_server.run_health_check_server, daemon=True)
     health_thread.start()
+    account1 = Account(authorization='Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwbGF5ZXJJZCI6ImQ0ZTVjYzc0LWU4ZTEtNDFmNC05MmQ2LTE0NTBhNTk2ZTRhZSIsImlhdCI6MTc4NTI0NzQ4NSwiZXhwIjoxNzkzMDIzNDg1fQ.okSBjmZkK4RUYOUXs0mU2pWBhB6kIEKPQeE4VXEaBFc', id='d4e5cc74-e8e1-41f4-92d6-1450a596e4ae')
+    game_headers = account1.get_headers()
     current_missionId = 1
     current_monstersKilled = 1000
     current_sleep_time = 80
@@ -36,16 +23,14 @@ if __name__ == '__main__':
     challengen_state = 0 #0: chua kiem tra, 1: da kiem tra, 2: da bat dau, 3: da ket thuc
     start_challegen_time = 0
     while True:
-        start_mission_body = mission_start_mission_body
-        json_data = json.loads(start_mission_body.decode('utf-8'))
-        json_data['missionId'] = current_missionId
-        start_mission_body = json.dumps(json_data).encode('utf-8')
+        account1.set_start_mission_body(current_missionId)
         response = requests.post(
-        url=mission_start_mission_url, 
+        url=account1.get_start_mission_url(), 
         headers=game_headers, 
-        data=start_mission_body
+        data=account1.get_start_mission_body()
         )
         data = response.json()
+        utils_game.my_print(data)
         data_error = data.get('error')
         if data_error:
             if 'Cannot replay completed mission' in data_error:
@@ -54,25 +39,21 @@ if __name__ == '__main__':
                 continue
             else:
                 time.sleep(current_sleep_time * 2)
-        complete_mission_body = mission_complete_mission_body
-        json_data = json.loads(complete_mission_body.decode('utf-8'))
-        json_data['missionId'] = current_missionId
         if is_test_monsters:
-            json_data['monstersKilled'] = 1000
+            account1.set_complete_mission_body(current_missionId, False, 1000)
         else:
             time.sleep(current_sleep_time)
             if is_complete_mission:
-                json_data['victory'] = True
-                json_data['monstersKilled'] = current_monstersKilled + 1
+                account1.set_complete_mission_body(current_missionId, True, current_monstersKilled + 1)
             else:
-                json_data['monstersKilled'] = current_monstersKilled
-        complete_mission_body = json.dumps(json_data).encode('utf-8')
+                account1.set_complete_mission_body(current_missionId, False, current_monstersKilled)
         response = requests.post(
-        url=mission_complete_mission_url, 
+        url=account1.get_complete_mission_url(), 
         headers=game_headers, 
-        data=complete_mission_body
+        data=account1.get_complete_mission_body()
         )
         data = response.json()
+        utils_game.my_print(data)
         data_error = data.get('error')
         if data_error:
             if data.get('code') == 'SERVER_ERROR':
@@ -97,27 +78,19 @@ if __name__ == '__main__':
                         challengen_state = 1
                     else:
                         challengen_state = 2
-                        start_challenge_body = challenge_start_challenge_body
-                        json_data = json.loads(start_challenge_body.decode('utf-8'))
-                        json_data['worldId'] = current_worldId
-                        start_challenge_body = json.dumps(json_data).encode('utf-8')
-                        requests.post(
-                        url=challenge_start_challenge_url, 
+                        account1.set_start_challenge_body(current_worldId)
+                        utils_game.my_print(requests.post(
+                        url=account1.get_start_challenge_url(), 
                         headers=game_headers, 
-                        data=start_challenge_body
-                        )
+                        data=account1.get_start_challenge_body()
+                        ).json())
                         start_challegen_time = time.time()
             elif challengen_state == 2:
                 if time.time() - start_challegen_time > 300:
-                    #challengen_state = 3
-                    complete_challenge_body = challenge_complete_challenge_body
-                    json_data = json.loads(complete_challenge_body.decode('utf-8'))
-                    json_data['worldId'] = current_worldId
-                    json_data['monstersKilled'] = monsters_killed_array[current_worldId%4]
-                    complete_challenge_body = json.dumps(json_data).encode('utf-8')
-                    requests.post(
-                    url=challenge_complete_challenge_url, 
+                    account1.set_complete_challenge_body(current_worldId, True, monsters_killed_array[current_worldId%4])
+                    utils_game.my_print(requests.post(
+                    url=account1.get_complete_challenge_url(), 
                     headers=game_headers, 
-                    data=complete_challenge_body
-                    )
+                    data=account1.get_complete_challenge_body()
+                    ).json())
                     challengen_state = 0
