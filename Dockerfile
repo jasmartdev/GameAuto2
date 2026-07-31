@@ -11,7 +11,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of your application code
-COPY health_check_server.py utils_game.py account.py main.py .
+COPY *.py .
 EXPOSE 443
 # Run the script when the container launches
 CMD ["python", "main.py"]
