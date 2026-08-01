@@ -34,7 +34,7 @@ if __name__ == '__main__':
             data = response.json()
         except Exception as e:
             print(e)
-            traceback.print_stack()
+            # traceback.print_stack()
             continue
         utils_game.my_print(data)
         data_error = data.get('error')
@@ -62,7 +62,7 @@ if __name__ == '__main__':
             data = response.json()
         except Exception as e:
             print(e)
-            traceback.print_stack()
+            # traceback.print_stack()
             continue
         utils_game.my_print(data)
         data_error = data.get('error')
@@ -97,7 +97,7 @@ if __name__ == '__main__':
                             ).json())
                         except Exception as e:
                             print(e)
-                            traceback.print_stack()
+                            # traceback.print_stack()
                             continue
                         start_challegen_time = time.time()
             elif challengen_state == 2:
@@ -111,7 +111,7 @@ if __name__ == '__main__':
                         ).json())
                     except Exception as e:
                         print(e)
-                        traceback.print_stack()
+                        # traceback.print_stack()
                         continue
                     challengen_state = 0
             #Forge
@@ -137,7 +137,7 @@ if __name__ == '__main__':
                                     ).json())
                             except Exception as e:
                                 print(e)
-                                traceback.print_stack()
+                                # traceback.print_stack()
                                 continue
                         else:
                             try:
@@ -147,6 +147,6 @@ if __name__ == '__main__':
                                 ).json())
                             except Exception as e:
                                 print(e)
-                                traceback.print_stack()
+                                # traceback.print_stack()
                                 continue
                         i = i + 1
