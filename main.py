@@ -90,11 +90,11 @@ if __name__ == '__main__':
                         challengen_state = 2
                         account1.set_start_challenge_body(current_worldId)
                         try:
-                            utils_game.my_print(requests.post(
+                            utils_game.my_print_response(requests.post(
                                 url=account1.get_start_challenge_url(), 
                                 headers=game_headers, 
                                 data=account1.get_start_challenge_body()
-                            ).json())
+                            ))
                         except Exception as e:
                             print(e)
                             # traceback.print_stack()
@@ -104,11 +104,11 @@ if __name__ == '__main__':
                 if time.time() - start_challegen_time > 300:
                     account1.set_complete_challenge_body(current_worldId, True, monsters_killed_array[current_worldId%4])
                     try:
-                        utils_game.my_print(requests.post(
+                        utils_game.my_print_response(requests.post(
                             url=account1.get_complete_challenge_url(), 
                             headers=game_headers, 
                             data=account1.get_complete_challenge_body()
-                        ).json())
+                        ))
                     except Exception as e:
                         print(e)
                         # traceback.print_stack()
@@ -125,26 +125,26 @@ if __name__ == '__main__':
                                 current_timestamp = time.time() * 1000
                                 if current_timestamp > forgeSlot.get('startTime') + forgeSlot.get('craftTimeMs'):
                                     account1.set_forge_claim_body(i)
-                                    utils_game.my_print(requests.post(
+                                    utils_game.my_print_response(requests.post(
                                         url=account1.get_forge_claim_url(), 
                                         headers=game_headers, 
                                         data=account1.get_forge_claim_body()
-                                    ).json())
+                                    ))
                                     time.sleep(2)
-                                    utils_game.my_print(requests.post(
+                                    utils_game.my_print_response(requests.post(
                                         url=account1.get_forge_craft_url(), 
                                         headers=game_headers
-                                    ).json())
+                                    ))
                             except Exception as e:
                                 print(e)
                                 # traceback.print_stack()
                                 continue
                         else:
                             try:
-                                utils_game.my_print(requests.post(
+                                utils_game.my_print_response(requests.post(
                                     url=account1.get_forge_craft_url(), 
                                     headers=game_headers
-                                ).json())
+                                ))
                             except Exception as e:
                                 print(e)
                                 # traceback.print_stack()
