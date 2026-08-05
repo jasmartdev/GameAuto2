@@ -14,11 +14,16 @@ class Account:
         self.start_challenge_body = b'{"worldId":1}'
         self.complete_challenge_url = 'https://defense-wall-production.up.railway.app/api/player/{0}/challenge/complete'
         self.complete_challenge_body = b'{"worldId":1,"victory":true,"wavesCompleted":10,"monstersKilled":1000,"battleEvents":[],"antiCheat":{"version":1,"team":[1,11,4,5,12],"waves":[]}}'
+        self.forge_claim_url = 'https://defense-wall-production.up.railway.app/api/player/{0}/forge/claim'
+        self.forge_claim_body = b'{"slotIndex":1}'
+        self.forge_craft_url = 'https://defense-wall-production.up.railway.app/api/player/{0}/forge/craft'
         self.headers['authorization']=authorization
         self.start_mission_url = self.start_mission_url.format(self.id)
         self.complete_mission_url = self.complete_mission_url.format(self.id)
         self.start_challenge_url = self.start_challenge_url.format(self.id)
         self.complete_challenge_url = self.complete_challenge_url.format(self.id)
+        self.forge_claim_url = self.forge_claim_url.format(self.id)
+        self.forge_craft_url = self.forge_craft_url.format(self.id)
 
     def get_headers(self):
         return self.headers
@@ -58,3 +63,13 @@ class Account:
         self.complete_challenge_body = json.dumps(json_data).encode('utf-8')
     def get_complete_challenge_body(self):
         return self.complete_challenge_body
+    def get_forge_claim_url(self):
+        return self.forge_claim_url
+    def set_forge_claim_body(self, slotIndex):
+        json_data = json.loads(self.forge_claim_body.decode('utf-8'))
+        json_data['slotIndex'] = slotIndex
+        self.forge_claim_body = json.dumps(json_data).encode('utf-8')
+    def get_forge_claim_body(self):
+        return self.forge_claim_body
+    def get_forge_craft_url(self):
+        return self.forge_craft_url
