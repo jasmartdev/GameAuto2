@@ -1,7 +1,6 @@
 import time
 import json
 import re
-import traceback
 import requests
 import threading
 import health_check_server
@@ -11,12 +10,13 @@ from account import Account
 if __name__ == '__main__':
     health_thread = threading.Thread(target=health_check_server.run_health_check_server, daemon=True)
     health_thread.start()
+    #JSMD
     account1 = Account(authorization='Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwbGF5ZXJJZCI6ImQ0ZTVjYzc0LWU4ZTEtNDFmNC05MmQ2LTE0NTBhNTk2ZTRhZSIsImlhdCI6MTc4NTI0NzQ4NSwiZXhwIjoxNzkzMDIzNDg1fQ.okSBjmZkK4RUYOUXs0mU2pWBhB6kIEKPQeE4VXEaBFc', id='d4e5cc74-e8e1-41f4-92d6-1450a596e4ae')
     game_headers = account1.get_headers()
-    current_missionId = 1
-    current_monstersKilled = 1000
-    current_sleep_time = 80
-    is_test_monsters = True
+    current_missionId = 300
+    current_monstersKilled = 433
+    current_sleep_time = 216
+    is_test_monsters = False
     is_complete_mission = False
     #Challenge
     monsters_killed_array = [319, 404, 440, 341]
@@ -34,9 +34,8 @@ if __name__ == '__main__':
             data = response.json()
         except Exception as e:
             print(e)
-            # traceback.print_stack()
             continue
-        utils_game.my_print(data)
+        #utils_game.my_print(data)
         data_error = data.get('error')
         if data_error:
             if 'Cannot replay completed mission' in data_error:
@@ -62,9 +61,8 @@ if __name__ == '__main__':
             data = response.json()
         except Exception as e:
             print(e)
-            # traceback.print_stack()
             continue
-        utils_game.my_print(data)
+        #utils_game.my_print(data)
         data_error = data.get('error')
         if data_error:
             if data.get('code') == 'SERVER_ERROR':
@@ -74,12 +72,12 @@ if __name__ == '__main__':
                 current_sleep_time = current_monstersKilled*0.5
                 is_test_monsters =  False
         elif data.get('success'):
-            #if is_complete_mission:
-                #is_test_monsters = True
-                #is_complete_mission = False
-                #current_missionId = current_missionId + 1
-            #elif data.get('goldLimit') and data.get('goldLimit').get('earnedAfter') == data.get('goldLimit').get('cap'):
-                #is_complete_mission = True
+            # if is_complete_mission:
+                # is_test_monsters = True
+                # is_complete_mission = False
+                # current_missionId = current_missionId + 1
+            # elif data.get('goldLimit') and data.get('goldLimit').get('earnedAfter') == data.get('goldLimit').get('cap'):
+                # is_complete_mission = True
             #Challenge
             if challengen_state == 0:
                 if data.get('player') and data.get('player').get('challengeCurrentWorld'):
@@ -97,7 +95,6 @@ if __name__ == '__main__':
                             ))
                         except Exception as e:
                             print(e)
-                            # traceback.print_stack()
                             continue
                         start_challegen_time = time.time()
             elif challengen_state == 2:
@@ -111,15 +108,16 @@ if __name__ == '__main__':
                         ))
                     except Exception as e:
                         print(e)
-                        # traceback.print_stack()
                         continue
                     challengen_state = 0
             #Forge
             if data.get('player'):
                 forgeSlots = data.get('player').get('forgeSlots')
+                #utils_game.my_print(forgeSlots)
                 if forgeSlots:
                     i = 0
                     for forgeSlot in forgeSlots:
+                        #utils_game.my_print(forgeSlot)
                         if forgeSlot:
                             try:
                                 current_timestamp = time.time() * 1000
@@ -137,7 +135,6 @@ if __name__ == '__main__':
                                     ))
                             except Exception as e:
                                 print(e)
-                                # traceback.print_stack()
                                 continue
                         else:
                             try:
@@ -147,6 +144,5 @@ if __name__ == '__main__':
                                 ))
                             except Exception as e:
                                 print(e)
-                                # traceback.print_stack()
                                 continue
                         i = i + 1
