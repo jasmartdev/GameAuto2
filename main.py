@@ -69,7 +69,7 @@ if __name__ == '__main__':
                 current_sleep_time = current_sleep_time + 20
             elif 'Invalid monstersKilled' in data_error:
                 current_monstersKilled = int(data.get('error').split('-')[1]) - 1
-                current_sleep_time = current_monstersKilled*0.5
+                current_sleep_time = current_monstersKilled*0.7
                 is_test_monsters =  False
         elif data.get('success'):
             # if is_complete_mission:
