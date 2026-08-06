@@ -23,6 +23,18 @@ if __name__ == '__main__':
     current_worldId = 1
     challengen_state = 0 #0: chua kiem tra, 1: da kiem tra, 2: da bat dau
     start_challegen_time = 0
+    response = requests.post(
+        url=account1.get_rewards_url(),
+        headers=game_headers
+    )
+    try:
+        data = response.json()
+    except Exception as e:
+        print(e)
+    #utils_game.my_print(data)
+    if data.get('success'):
+        if data.get('player') and data.get('player').get('currentMission'):
+            current_missionId = data.get('player').get('currentMission')
     while True:
         account1.set_start_mission_body(current_missionId)
         response = requests.post(
